@@ -1,2 +1,11 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+    import GridCell from "../components/Cell.svelte";
+    import type { Cell } from "../interfaces/cell";
+    import { Type } from "../interfaces/type";
+    let someCell : Cell = { cellType: Type.None };
+</script>
+
+
+<main>
+    <GridCell cell={ someCell } />
+</main>

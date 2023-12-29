@@ -1,5 +1,5 @@
 export enum Type {
-    Blue,
+    Yellow,
     Red,
     None
 }

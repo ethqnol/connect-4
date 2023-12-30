@@ -54,6 +54,18 @@ function checkWin(){
     return false;
 }
 
+function checkEnd(){
+    if(checkWin()) {
+        return true;
+    }
+
+    if(grid[0][0].cellType != Type.None && grid[1][0].cellType != Type.None && grid[2][0].cellType != Type.None && grid[3][0].cellType != Type.None && grid[4][0].cellType != Type.None && grid[5][0].cellType != Type.None && grid[6][0].cellType != Type.None){
+        return true;
+    }
+
+    return false;
+}
+
 function handleMousemove(event : MouseEvent) {
     const nodeBoundX = boardNode.getBoundingClientRect().x;
     const change = event.clientX - nodeBoundX - 4;

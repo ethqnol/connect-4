@@ -1,5 +1,6 @@
 <script lang=ts>
 import type { Cell } from "../interfaces/cell";
+import { MCTS } from "../lib/MCTS"
 import { Type } from "../interfaces/type";
 import { tweened } from "svelte/motion";
 import { cubicOut } from "svelte/easing";
@@ -12,6 +13,8 @@ const BOARDWIDTH = 7
 export let grid : Cell[][]
 let boardNode : HTMLElement;
 
+let mcts = new MCTS(grid);
+
 enum Turn {
     Player,
     Computer
@@ -21,29 +24,30 @@ let placeholderPosition = tweened(0, { easing: cubicOut });
 let column = 0;
 let turn = Turn.Player
 
-function checkWin(){
+export function checkWin(){
+
     for(let c = 0; c < BOARDWIDTH; c++){
         for(let r = 0; r < BOARDHEIGHT; r++){
             if(grid[c][r].cellType != Type.None){
-                if(grid[c][r + 3] != null){
+                if(r+3 < BOARDHEIGHT){
                     if(grid[c][r].cellType == grid[c][r + 1].cellType && grid[c][r].cellType == grid[c][r + 2].cellType && grid[c][r].cellType ==  grid[c][r + 3].cellType){
-                        return true;
+                        return grid[c][r].cellType;
                     }
                 }
-                if(grid[c + 3][r] != null){
+                if(c + 3 < BOARDWIDTH){
                     if(grid[c][r].cellType == grid[c + 1][r].cellType && grid[c][r].cellType == grid[c + 2][r].cellType && grid[c][r].cellType ==  grid[c + 3][r].cellType){
-                        return true;
+                        return grid[c][r].cellType;
                     }
                 }
 
-                if(grid[c + 3][r + 3] != null){
+                if(c + 3 < BOARDWIDTH && r + 3 < BOARDHEIGHT){
                     if(grid[c][r].cellType == grid[c + 1][r + 1].cellType && grid[c][r].cellType == grid[c + 2][r + 2].cellType && grid[c][r].cellType ==  grid[c + 3][r + 3].cellType){
-                        return true;
+                        return grid[c][r].cellType;
                     }
                 }
-                if(c > 3 && grid[c - 3][r + 3] != null){
+                if(c > 3 && typeof grid[c - 3][r + 3] !== "undefined"){
                     if(grid[c][r].cellType == grid[c - 1][r + 1].cellType && grid[c][r].cellType == grid[c - 2][r + 2].cellType && grid[c][r].cellType ==  grid[c - 3][r + 3].cellType){
-                        return true;
+                        return grid[c][r].cellType;
                     }
                 }
             }
@@ -51,11 +55,11 @@ function checkWin(){
             
         }
     }
-    return false;
+    return Type.None;
 }
 
 function checkEnd(){
-    if(checkWin()) {
+    if(checkWin() != Type.None) {
         return true;
     }
 
@@ -66,7 +70,7 @@ function checkEnd(){
     return false;
 }
 
-function handleMousemove(event : MouseEvent) {
+async function handleMousemove(event : MouseEvent) {
     const nodeBoundX = boardNode.getBoundingClientRect().x;
     const change = event.clientX - nodeBoundX - 4;
     column = Math.min(Math.max(Math.floor(change / (60)), 0), 6);
@@ -74,20 +78,36 @@ function handleMousemove(event : MouseEvent) {
 }
 
 function playMove(index: number){
-    for(let depth = 0; depth < BOARDHEIGHT; depth++){
-        console.log(grid[depth][index])
+    if(grid[0][0].cellType != Type.None){
+        return false
+    }
+    let type = Type.Red;
+    if(turn == Turn.Computer) {
+        type = Type.Yellow
+    }
+    for(let depth = 0; depth <= BOARDHEIGHT - 1; depth++){
         if(grid[index][depth].cellType != Type.None ){
-            grid[index][depth - 1] = { cellType: Type.Red};
+            grid[index][depth - 1] = { cellType: type};
             grid = grid;
             return;
         }
     }
-    grid[index][5] = { cellType: Type.Red};
 
-    
+    grid[index][5] = { cellType: type};
+    return true;
 }
 
-function handleInput(index : number){
+async function computerMove(){
+    mcts.search();
+    let bestMove : number = mcts.best();
+    console.log(bestMove)
+    playMove(bestMove);
+    mcts.move(bestMove);
+    turn = Turn.Player
+
+}
+
+async function handleInput(index : number){
     if(turn != Turn.Player){
         return;
     }
@@ -95,13 +115,22 @@ function handleInput(index : number){
         return;
     }
 
-    playMove(index)
-    if(checkWin()){
-        console.log("DSJKL:FSDHJKLF")
+    playMove(index);
+    grid = grid;
+    await sleep(200);
+    mcts.move(index);
+
+    if(checkEnd()){
+        console.log(")^&*&(*)^&((^&*^)((^")
         return;
     }
-    // turn = Turn.Computer
+    turn = Turn.Computer
+    
+    computerMove();
     return;
+}
+function sleep(ms : number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 </script>
 <div class="board">

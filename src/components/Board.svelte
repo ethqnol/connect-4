@@ -102,7 +102,7 @@ async function computerMove(){
     let bestMove : number = mcts.best();
     console.log(bestMove)
     playMove(bestMove);
-    mcts.move(bestMove);
+    mcts.update(bestMove);
     turn = Turn.Player
 
 }
@@ -118,7 +118,7 @@ async function handleInput(index : number){
     playMove(index);
     grid = grid;
     await sleep(200);
-    mcts.move(index);
+    mcts.update(index);
 
     if(checkEnd()){
         console.log(")^&*&(*)^&((^&*^)((^")

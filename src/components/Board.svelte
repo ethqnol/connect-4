@@ -100,7 +100,6 @@ function playMove(index: number){
 async function computerMove(){
     mcts.search();
     let bestMove : number = mcts.best();
-    console.log(bestMove)
     playMove(bestMove);
     mcts.update(bestMove);
     turn = Turn.Player
@@ -117,6 +116,7 @@ async function handleInput(index : number){
 
     playMove(index);
     grid = grid;
+    turn = Turn.Computer
     await sleep(200);
     mcts.update(index);
 
@@ -124,7 +124,7 @@ async function handleInput(index : number){
         console.log(")^&*&(*)^&((^&*^)((^")
         return;
     }
-    turn = Turn.Computer
+    
     
     computerMove();
     return;
@@ -132,9 +132,13 @@ async function handleInput(index : number){
 function sleep(ms : number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+
 </script>
 <div class="board">
-    <div class="placeholder" style="left: {$placeholderPosition}px"><Temporary /></div>
+    {#if turn == Turn.Player}
+        <div class="placeholder" style="left: {$placeholderPosition}px"><Temporary /></div>
+    {/if}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="grid" bind:this={boardNode} on:mousemove={handleMousemove} on:click={(event) => { handleInput(column); }}>

@@ -1,6 +1,6 @@
 import { Type } from "../interfaces/type";
 import type { Cell } from "../interfaces/cell";
-import { checkEnd, outcome, getLegalMoves, makeMove, sleep } from "./utils"
+import { sleep } from "./utils"
 export class Node {
     Q: number;
     N: number;
@@ -36,19 +36,15 @@ export class Node {
 
 export class MCTS{
     root: Node;
-    player: Type;
-    realTurn: Type;
     originalGrid : Game;
 
     constructor(grid: Cell[][]){
         this.root = new Node(NaN, null);
-        this.player = Type.Red;
-        this.realTurn = Type.Red;
-        this.originalGrid = structuredClone(new Game(Type.Red, grid));
+        this.originalGrid = new Game(Type.Red, structuredClone(grid));
     }
 
     selection(){
-        let grid =  structuredClone(this.originalGrid);
+        let grid =  new Game(structuredClone(this.originalGrid.player), structuredClone(this.originalGrid.grid));
         let node = this.root;
 
         while (node.children.length > 0){
@@ -66,7 +62,7 @@ export class MCTS{
 
             node = maxNodes[Math.floor(Math.random() * maxNodes.length)];
 
-            grid.move(node.move);
+            grid.makeMove(node.move);
 
             if(node.N == 0){
                 return {node: node, grid: grid};
@@ -76,7 +72,7 @@ export class MCTS{
         
         if(this.expand(node, grid)){
             node = node.children[Math.floor(Math.random() * node.children.length)];
-            grid.move(node.move)
+            grid.makeMove(node.move)
         }
 
         return {node: node, grid: grid};
@@ -86,9 +82,15 @@ export class MCTS{
         if(grid.checkEnd()){
             return false;
         }
+        const legal : number[] = grid.getLegalMoves();
 
-        const children: Node[] = grid.getLegalMoves().map(move => new Node(move, parent));
-        parent.children.push(...children);
+        for(let i = 0; i < legal.length; i++){
+            const matchingChild = parent.children.find(child => child.move === legal[i]);
+            if(!matchingChild){
+                parent.children.push(new Node(legal[i], parent))
+            }
+        }
+
 
         return true;
     }
@@ -96,23 +98,20 @@ export class MCTS{
     rollout(grid: Game){
         while(grid.checkEnd() == false){
             let legalMoves = grid.getLegalMoves();
-            grid.move( legalMoves[Math.floor(Math.random() * legalMoves.length)])
+            grid.makeMove( legalMoves[Math.floor(Math.random() * legalMoves.length)])
         }
 
         return grid.outcome();
     }
 
-    backprop(node: Node | null, turn: Type, outcome: Type){
+   backprop(node: Node | null, turn: Type, outcome: Type){
         let reward = 0;
 
         if(outcome != turn){
             reward = 1;
         }
 
-        for(;;){
-            if(node == null && node != this.root){
-                break;
-            }
+        while(node != null){
 
             node.N += 1;
             node.Q += reward;
@@ -127,24 +126,21 @@ export class MCTS{
          }
     }
 
-    async search(){
-        let timeLimit = 1800;
+    search(){
+        let timeLimit = 8000;
         //let rolloutCount = 0;
         let start = Date.now()
         while (Date.now() - start <= timeLimit) {
-              // Perform one MCTS step here
               let selected = this.selection();
               let node = selected.node;
               let grid = selected.grid;
               let outcome = this.rollout(grid);
-              this.backprop(node, this.player, outcome);
-
-          }
+              this.backprop(node, grid.player, outcome);
+        }
 
     }
 
     best(){
-        
         if(this.originalGrid.checkEnd() == true){
             return -1;
         }
@@ -152,12 +148,12 @@ export class MCTS{
         let maxNode = children[0];
         for(let i = 1; i < children.length; i++){
             let newNode = children[i];
-            if(newNode.value() > maxNode.value()){
+            if(newNode.N > maxNode.N){
                 maxNode = newNode;
             }
         }
 
-        let maxNodes = children.filter(n => n.value() === maxNode.value());
+        let maxNodes = children.filter(n => n.N === maxNode.N);
 
         let node = maxNodes[Math.floor(Math.random() * maxNodes.length)];
         return node.move;
@@ -165,9 +161,13 @@ export class MCTS{
     }
 
     update(move: number){
-        this.originalGrid.move(move)
-        if(move in this.root.children){    
-            this.root = this.root.children[move];
+
+        this.originalGrid.makeMove(move);
+        const matchingChild = this.root.children.find(child => child.move === move);
+
+        if (matchingChild) {
+            this.root = matchingChild;
+
         } else {
             this.root = new Node(NaN, null);
         }
@@ -175,7 +175,7 @@ export class MCTS{
 }
 
 
-class Game {
+export class Game {
     player: Type;
     grid: Cell[][];
 
@@ -185,10 +185,16 @@ class Game {
         this.grid = board;
     }
 
-    move(move: number) {
+    makeMove(move: number) {
+        
         for(let depth = 0; depth < 6; depth++){
             if(this.grid[move][depth].cellType != Type.None ){
                 this.grid[move][depth - 1] = { cellType: this.player };
+                if(this.player == Type.Red){
+                    this.player = Type.Yellow;
+                } else {
+                    this.player = Type.Red;
+                }
                 return;
             }
         }

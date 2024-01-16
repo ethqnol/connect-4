@@ -128,7 +128,7 @@ export class MCTS{
 
     async search(){
         let timeLimit = 8000;
-        //let rolloutCount = 0;
+        let rolloutCount = 0;
         let start = Date.now()
         while (Date.now() - start <= timeLimit) {
               let selected = this.selection();
@@ -136,7 +136,7 @@ export class MCTS{
               let grid = selected.grid;
               let outcome = this.rollout(grid);
               this.backprop(node, grid.player, outcome);
-              console.log("here")
+              rolloutCount = rolloutCount + 1;
               await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
         }

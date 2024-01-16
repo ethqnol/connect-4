@@ -20,10 +20,14 @@ enum Turn {
     Computer
 }
 
+let computerWin = false;
+let playerWin = true;
+
 let placeholderPosition = tweened(0, { easing: cubicOut });
 let column = 0;
-let turn = Turn.Player
-
+let turn : number = Turn.Player
+let rollouts = 0;
+let seconds : number = 0;
 export function checkWin(){
 
     for(let c = 0; c < BOARDWIDTH; c++){
@@ -98,11 +102,21 @@ function playMove(index: number){
 }
 
 async function computerMove(){
-    await mcts.search();
-    let bestMove : number = mcts.best();
-    playMove(bestMove);
-    mcts.update(bestMove);
-    turn = Turn.Player
+    await new Promise<void>(async resolve => {
+           await  mcts.search();
+            let bestMove = mcts.best();
+            playMove(bestMove);
+            mcts.update(bestMove);
+            rollouts = mcts.rollouts;
+            seconds = mcts.time;
+            // Update the turn and check for the end of the game
+            turn = Turn.Player;
+            if (checkEnd()) {
+                console.log("Game Over!");
+            }
+
+            resolve();
+    });
 
 }
 
@@ -135,6 +149,7 @@ function sleep(ms : number) {
 
 
 </script>
+
 <div class="board">
     {#if turn == Turn.Player}
         <div class="placeholder" style="left: {$placeholderPosition}px"><Temporary /></div>
@@ -155,7 +170,12 @@ function sleep(ms : number) {
 </div>
 
 {#if turn == Turn.Computer}
-    <div class="computer-thinking"> Computer Is Thinking ...</div>
+    <div class="computer-thinking"> Computer Is Thinking</div>
+{:else}
+    <div class="computer-thinking"> 
+        <h4>Stats For Nerds (On Prev Computer Move):</h4>
+        <p> Rolled out <strong>{ rollouts }</strong> simulations in <strong>{ seconds/1000 }</strong> seconds</p>
+    </div>
 {/if}
 <style>
     .board {
@@ -164,11 +184,19 @@ function sleep(ms : number) {
         background-color: #155bcb;
         position: relative;
     }
+
     .computer-thinking {
-        font-size: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        white-space: pre-line;
+        font-size: 18px;
+        font-weight: bold;
         color: #333;
-        text-align: center;
-        padding: 10px;
+        padding: 10px 20px;
+        border-radius: 5px;
+        background-color: #eee; /* Adjust background color as needed */
     }
     .grid {
       display: flex;
@@ -191,5 +219,17 @@ function sleep(ms : number) {
     .placeholder {
         position: absolute;
         top: -70px;
+    }
+
+    h4{
+        padding: 5px;
+        margin: 0;
+    }
+
+    p {
+        font-size: 1rem;
+        font-weight: 520;
+        margin: 5px;
+        font-family: 'Courier New', Courier, monospace;
     }
 </style>

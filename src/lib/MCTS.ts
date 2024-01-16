@@ -37,10 +37,13 @@ export class Node {
 export class MCTS{
     root: Node;
     originalGrid : Game;
-
+    rollouts: number;
+    time: number;
     constructor(grid: Cell[][]){
         this.root = new Node(NaN, null);
         this.originalGrid = new Game(Type.Red, structuredClone(grid));
+        this.rollouts = 0;
+        this.time = 0;
     }
 
     selection(){
@@ -127,7 +130,7 @@ export class MCTS{
     }
 
     async search(){
-        let timeLimit = 8000;
+        let timeLimit = 5000;
         let rolloutCount = 0;
         let start = Date.now()
         while (Date.now() - start <= timeLimit) {
@@ -137,9 +140,9 @@ export class MCTS{
               let outcome = this.rollout(grid);
               this.backprop(node, grid.player, outcome);
               rolloutCount = rolloutCount + 1;
-              await new Promise<void>((resolve) => setTimeout(resolve, 0));
-
         }
+        this.rollouts = rolloutCount;
+        this.time = Date.now() - start;
         return new Promise<void>((resolve) => resolve());
     }
 
@@ -164,7 +167,7 @@ export class MCTS{
     }
 
     update(move: number){
-
+        console.log(this.originalGrid.player)
         this.originalGrid.makeMove(move);
         const matchingChild = this.root.children.find(child => child.move === move);
 

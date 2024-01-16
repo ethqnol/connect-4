@@ -126,7 +126,7 @@ export class MCTS{
          }
     }
 
-    search(){
+    async search(){
         let timeLimit = 8000;
         //let rolloutCount = 0;
         let start = Date.now()
@@ -136,8 +136,11 @@ export class MCTS{
               let grid = selected.grid;
               let outcome = this.rollout(grid);
               this.backprop(node, grid.player, outcome);
-        }
+              console.log("here")
+              await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
+        }
+        return new Promise<void>((resolve) => resolve());
     }
 
     best(){

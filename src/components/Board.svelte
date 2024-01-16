@@ -98,7 +98,7 @@ function playMove(index: number){
 }
 
 async function computerMove(){
-    mcts.search();
+    await mcts.search();
     let bestMove : number = mcts.best();
     playMove(bestMove);
     mcts.update(bestMove);
@@ -154,12 +154,21 @@ function sleep(ms : number) {
     </div>
 </div>
 
+{#if turn == Turn.Computer}
+    <div class="computer-thinking"> Computer Is Thinking ...</div>
+{/if}
 <style>
     .board {
         padding: 16px;
         border-radius: 4px;
         background-color: #155bcb;
         position: relative;
+    }
+    .computer-thinking {
+        font-size: 20px;
+        color: #333;
+        text-align: center;
+        padding: 10px;
     }
     .grid {
       display: flex;

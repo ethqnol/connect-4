@@ -33,23 +33,23 @@ export function checkWin(){
     for(let c = 0; c < BOARDWIDTH; c++){
         for(let r = 0; r < BOARDHEIGHT; r++){
             if(grid[c][r].cellType != Type.None){
-                if(r+3 < BOARDHEIGHT){
-                    if(grid[c][r].cellType == grid[c][r + 1].cellType && grid[c][r].cellType == grid[c][r + 2].cellType && grid[c][r].cellType ==  grid[c][r + 3].cellType){
-                        return grid[c][r].cellType;
-                    }
-                }
-                if(c + 3 < BOARDWIDTH){
-                    if(grid[c][r].cellType == grid[c + 1][r].cellType && grid[c][r].cellType == grid[c + 2][r].cellType && grid[c][r].cellType ==  grid[c + 3][r].cellType){
-                        return grid[c][r].cellType;
-                    }
-                }
+                // if(r+3 < BOARDHEIGHT){
+                //     if(grid[c][r].cellType == grid[c][r + 1].cellType && grid[c][r].cellType == grid[c][r + 2].cellType && grid[c][r].cellType ==  grid[c][r + 3].cellType){
+                //         return grid[c][r].cellType;
+                //     }
+                // }
+                // if(c + 3 < BOARDWIDTH){
+                //     if(grid[c][r].cellType == grid[c + 1][r].cellType && grid[c][r].cellType == grid[c + 2][r].cellType && grid[c][r].cellType ==  grid[c + 3][r].cellType){
+                //         return grid[c][r].cellType;
+                //     }
+                // }
 
                 if(c + 3 < BOARDWIDTH && r + 3 < BOARDHEIGHT){
                     if(grid[c][r].cellType == grid[c + 1][r + 1].cellType && grid[c][r].cellType == grid[c + 2][r + 2].cellType && grid[c][r].cellType ==  grid[c + 3][r + 3].cellType){
                         return grid[c][r].cellType;
                     }
                 }
-                if(c > 3 && typeof grid[c - 3][r + 3] !== "undefined"){
+                if(c >= 3 && typeof grid[c - 3][r + 3] !== "undefined"){
                     if(grid[c][r].cellType == grid[c - 1][r + 1].cellType && grid[c][r].cellType == grid[c - 2][r + 2].cellType && grid[c][r].cellType ==  grid[c - 3][r + 3].cellType){
                         return grid[c][r].cellType;
                     }

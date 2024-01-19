@@ -246,7 +246,7 @@ export class Game {
                             return this.grid[c][r].cellType;
                         }
                     }
-                    if(c > 3 && typeof this.grid[c - 3][r + 3] !== "undefined"){
+                    if(c >= 3 && typeof this.grid[c - 3][r + 3] !== "undefined"){
                         if(this.grid[c][r].cellType == this.grid[c - 1][r + 1].cellType && this.grid[c][r].cellType == this.grid[c - 2][r + 2].cellType && this.grid[c][r].cellType ==  this.grid[c - 3][r + 3].cellType){
                             return this.grid[c][r].cellType;
                         }

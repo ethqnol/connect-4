@@ -4,6 +4,7 @@
     import { Type } from "../interfaces/type";
     let defaultCell : Cell = { cellType: Type.None };
     let grid = Array.from({length: 7}, e => Array(6).fill(defaultCell));
+   
 </script>
 
 

@@ -7,6 +7,7 @@
 </script>
 
 
+
 <main>
     <div class="game">
         <div class="board">

@@ -28,7 +28,7 @@ jobs:
 
       - name: build
         env:
-          BASE_PATH: '/connect-4'
+          BASE_PATH: '/connect4'
         run: |
           npm run build
 

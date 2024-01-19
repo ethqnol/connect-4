@@ -144,7 +144,7 @@ async function handleInput(index : number){
 
     playMove(index);
     grid = grid;
-    //turn = Turn.Computer
+    turn = Turn.Computer
     await sleep(200);
     mcts.update(index);
 
@@ -159,7 +159,7 @@ async function handleInput(index : number){
     }
     
     
-    //computerMove();
+    computerMove();
     return;
 }
 function sleep(ms : number) {

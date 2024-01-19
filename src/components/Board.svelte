@@ -22,7 +22,7 @@ enum Turn {
 
 let computerWin = false;
 let playerWin = false;
-
+let draw = false;
 let placeholderPosition = tweened(0, { easing: cubicOut });
 let column = 0;
 let turn : number = Turn.Player
@@ -74,6 +74,14 @@ function checkEnd(){
     return false;
 }
 
+function checkDraw(){
+    if(grid[0][0].cellType != Type.None && grid[1][0].cellType != Type.None && grid[2][0].cellType != Type.None && grid[3][0].cellType != Type.None && grid[4][0].cellType != Type.None && grid[5][0].cellType != Type.None && grid[6][0].cellType != Type.None){
+        return true;
+    }
+
+    return false;
+}
+
 async function handleMousemove(event : MouseEvent) {
     const nodeBoundX = boardNode.getBoundingClientRect().x;
     const change = event.clientX - nodeBoundX - 4;
@@ -113,6 +121,10 @@ async function computerMove(){
             turn = Turn.Player;
             if (checkEnd()) {
                 console.log("Game Over!");
+                if(checkDraw() == true){
+                    draw == true;
+                    return;
+                }
                 computerWin = true;
                 return;
             }
@@ -137,7 +149,11 @@ async function handleInput(index : number){
     mcts.update(index);
 
     if(checkEnd()){
-        console.log(")^&*&(*)^&((^&*^)((^")
+
+        if(checkDraw() == true){
+            draw == true;
+            return;
+        }
         playerWin = true;
         return;
     }
@@ -154,7 +170,7 @@ function sleep(ms : number) {
 </script>
 
 
-{#if playerWin == false && computerWin == false}
+{#if playerWin == false && computerWin == false && draw == false}
     <div class="board">
         {#if turn == Turn.Player}
             <div class="placeholder" style="left: {$placeholderPosition}px"><Temporary /></div>
@@ -183,7 +199,7 @@ function sleep(ms : number) {
         </div>
     {/if}
 {:else}
-    <h1> {#if computerWin} Computer Wins {:else} Player Wins {/if}</h1>
+    <h1> {#if computerWin} Computer Wins {:else if draw == true} Draw! {:else} Player Wins {/if}</h1>
     <h2> Final Board State: </h2>
     <div class="board">
         <div class="grid">

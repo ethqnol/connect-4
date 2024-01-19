@@ -21,7 +21,7 @@ enum Turn {
 }
 
 let computerWin = false;
-let playerWin = true;
+let playerWin = false;
 
 let placeholderPosition = tweened(0, { easing: cubicOut });
 let column = 0;
@@ -113,6 +113,8 @@ async function computerMove(){
             turn = Turn.Player;
             if (checkEnd()) {
                 console.log("Game Over!");
+                computerWin = true;
+                return;
             }
 
             resolve();
@@ -136,6 +138,7 @@ async function handleInput(index : number){
 
     if(checkEnd()){
         console.log(")^&*&(*)^&((^&*^)((^")
+        playerWin = true;
         return;
     }
     
@@ -150,32 +153,53 @@ function sleep(ms : number) {
 
 </script>
 
-<div class="board">
-    {#if turn == Turn.Player}
-        <div class="placeholder" style="left: {$placeholderPosition}px"><Temporary /></div>
-    {/if}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div class="grid" bind:this={boardNode} on:mousemove={handleMousemove} on:click={(event) => { handleInput(column); }}>
-        <div class="column">
-            {#each grid as column, i}
-                <div class="row">
-                    {#each column as cell}
-                        <GridCell {cell} />
-                    {/each}
-                </div>
-            {/each}
+
+{#if playerWin == false && computerWin == false}
+    <div class="board">
+        {#if turn == Turn.Player}
+            <div class="placeholder" style="left: {$placeholderPosition}px"><Temporary /></div>
+        {/if}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div class="grid" bind:this={boardNode} on:mousemove={handleMousemove} on:click={(event) => { handleInput(column); }}>
+            <div class="column">
+                {#each grid as column}
+                    <div class="row">
+                        {#each column as cell}
+                            <GridCell {cell} />
+                        {/each}
+                    </div>
+                {/each}
+            </div>
         </div>
     </div>
-</div>
 
-{#if turn == Turn.Computer}
-    <div class="computer-thinking"> Computer Is Thinking</div>
+    {#if turn == Turn.Computer}
+        <div class="computer-thinking"> <p class="thinking-animation"> Computer Is Thinking</p> </div>
+    {:else}
+        <div class="computer-thinking"> 
+            <h4>Stats For Nerds (On Prev Computer Move):</h4>
+            <p> Rolled out <strong>{ rollouts }</strong> simulations in <strong>{ seconds/1000 }</strong> secs</p>
+        </div>
+    {/if}
 {:else}
-    <div class="computer-thinking"> 
-        <h4>Stats For Nerds (On Prev Computer Move):</h4>
-        <p> Rolled out <strong>{ rollouts }</strong> simulations in <strong>{ seconds/1000 }</strong> seconds</p>
+    <h1> {#if computerWin} Computer Wins {:else} Player Wins {/if}</h1>
+    <h2> Final Board State: </h2>
+    <div class="board">
+        <div class="grid">
+            <div class="column">
+                {#each grid as column}
+                    <div class="row">
+                        {#each column as cell}
+                            <GridCell {cell} />
+                        {/each}
+                    </div>
+                {/each}
+            </div>
+        </div>
     </div>
+
+
 {/if}
 <style>
     .board {
@@ -196,7 +220,7 @@ function sleep(ms : number) {
         color: #333;
         padding: 10px 20px;
         border-radius: 5px;
-        background-color: #eee; /* Adjust background color as needed */
+        background-color: #eee; 
     }
     .grid {
       display: flex;
@@ -227,9 +251,25 @@ function sleep(ms : number) {
     }
 
     p {
-        font-size: 1rem;
+        font-size: 0.9rem;
         font-weight: 520;
         margin: 5px;
         font-family: 'Courier New', Courier, monospace;
+    }
+    
+    .thinking-animation{
+        animation: thinkingAnimation 1.5s infinite alternate;
+        color: black;
+        font-weight: 600;
+    }
+    @keyframes thinkingAnimation {
+      0% {
+        opacity: 0.7;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1.4);
+      }
     }
 </style>

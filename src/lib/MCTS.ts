@@ -133,13 +133,19 @@ export class MCTS{
         let timeLimit = 5000;
         let rolloutCount = 0;
         let start = Date.now()
-        while (Date.now() - start <= timeLimit) {
+        let extra = Math.floor(Math.random() * (100000 - 10000 + 1)) + 10000
+        for(let i = 0; i < 120000 + extra ; i ++){
               let selected = this.selection();
               let node = selected.node;
               let grid = selected.grid;
               let outcome = this.rollout(grid);
               this.backprop(node, grid.player, outcome);
               rolloutCount = rolloutCount + 1;
+              if(i % 10000 == 0){
+                await new Promise((resolve) => requestAnimationFrame(resolve));
+              }
+              
+              console.log("here, ", i)
         }
         this.rollouts = rolloutCount;
         this.time = Date.now() - start;
